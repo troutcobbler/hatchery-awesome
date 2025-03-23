@@ -143,7 +143,7 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- Launcher widget functions
     s.mylauncher:connect_signal('button::release', function(self)
-        awful.spawn.easy_async(launcher, function() end)
+        awful.spawn(launcher)
     end)
 
     -- Taglist widget
@@ -169,6 +169,47 @@ awful.screen.connect_for_each_screen(function(s)
         },
         buttons = taglist_buttons,
     }
+
+    -- Battery widget       
+    s.mybattery = wibox.layout {
+        layout = wibox.layout.fixed.vertical,
+        {
+            top = 2, 
+            bottom = 4, 
+            widget = wibox.container.margin,
+            {   
+                markup = "<span foreground='#606d84'></span>",
+                align = "center",
+                valign = "center",
+                widget = wibox.widget.textbox,
+            },
+        },          
+    }
+
+    -- Battery widget functions
+    --s.mybattery:connect_signal('button::release', function(self)
+    --    awful.spawn.easy_async("nada", function() end)
+    --end)
+
+    -- Network widget
+    s.mynetwork = wibox.layout {
+        layout = wibox.layout.fixed.vertical,
+        {
+            bottom = 4,
+            widget = wibox.container.margin,
+            {
+                markup = "<span foreground='#766577'>直</span>",
+                align = "center",
+                valign = "center",
+                widget = wibox.widget.textbox,
+            },
+        },
+    }
+
+    -- Network widget functions
+    s.mynetwork:connect_signal('button::release', function(self)
+        awful.spawn.easy_async(terminal.." -e ".."nmtui", function() end)
+    end)
 
     -- Brightness widget
     s.mybrightness = wibox.layout {
@@ -330,7 +371,7 @@ awful.screen.connect_for_each_screen(function(s)
 
         -- launch pavucontrol when clicking on volume icon
         children[5]:connect_signal('button::release', function()
-            awful.spawn.easy_async("pavucontrol", function() end)
+            awful.spawn("pavucontrol")
         end)
 
     end)
@@ -437,27 +478,8 @@ awful.screen.connect_for_each_screen(function(s)
                         widget = wibox.container.margin,
                         {
                             layout = wibox.layout.fixed.vertical,
-                            {
-                                top    = 2,
-                                bottom = 4,
-                                widget = wibox.container.margin,
-                                {
-                                    markup = "<span foreground='#606d84'></span>",
-                                    align = "center",
-                                    valign = "center",
-                                    widget = wibox.widget.textbox,
-                                },
-                            },
-                            {   
-                                bottom = 4,
-                                widget = wibox.container.margin,
-                                {   
-                                    markup = "<span foreground='#766577'>直</span>",
-                                    align = "center",
-                                    valign = "center",
-                                    widget = wibox.widget.textbox,
-                                },
-                            },
+                            s.mybattery,
+                            s.mynetwork,
                             s.mybrightness,
                             s.myvolume,
                         },
