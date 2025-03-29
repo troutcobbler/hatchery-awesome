@@ -413,16 +413,80 @@ awful.screen.connect_for_each_screen(function(s)
     s.mypower = wibox.layout {
         layout = wibox.layout.fixed.vertical,
         {
-            markup = "<span foreground='#9d5b61'>襤</span>",
-            align = "center",
-            valign = "center",
-            widget = wibox.widget.textbox,
+            layout = wibox.layout.fixed.vertical,
+            forced_height = 0,
+            {
+                widget = wibox.container.margin,
+                bottom = 4,
+                {
+                    markup = "<span foreground='#838d69'>鈴</span>",
+                    align = "center",
+                    valign = "center",
+                    widget = wibox.widget.textbox,
+                },
+            },
+            {
+                bottom = 4,
+                widget = wibox.container.margin,
+                {
+                    markup = "<span foreground='#b38d6a'>凌</span>",
+                    align = "center",
+                    valign = "center",
+                    widget = wibox.widget.textbox,
+                },
+            },
+            {
+                bottom = 4,
+                widget = wibox.container.margin, 
+                {
+                    markup = "<span foreground='#766577'>﫼</span>",
+                    align = "center",
+                    valign = "center",
+                    widget = wibox.widget.textbox,
+                },
+            },
+            {
+                bottom = 4,
+                widget = wibox.container.margin,
+                {
+                    markup = "<span foreground='#606d84'></span>",
+                    align = "center",
+                    valign = "center",
+                    widget = wibox.widget.textbox,
+                },
+            },
+        },
+        {
+            bottom = 2,
+            widget = wibox.container.margin,
+            {
+                markup = "<span foreground='#9d5b61'>襤</span>",
+                align = "center",
+                valign = "center",
+                widget = wibox.widget.textbox,
+            },
         },
     }
 
     -- Power widget functions
     s.mypower:connect_signal('button::release', function(self)
         awful.spawn.easy_async("slock", function() end)
+    end)
+
+    s.mypower:connect_signal('mouse::enter', function(self)
+
+        -- Get table of children widgets
+        local children = self:get_all_children()
+
+        -- Reveal menu 
+        children[1].forced_height = 108
+
+    end)
+
+    -- Hide slider when leaving widget
+    s.mypower:connect_signal('mouse::leave', function(self)
+        local children = self:get_all_children()
+        children[1].forced_height = 0
     end)
 
     -- Create some shapes for our widgets
@@ -789,6 +853,10 @@ awful.rules.rules = {
     -- Set nextcloud to always map on the tag named ""
     { rule = { instance = "nextcloud" },
       properties = { tag = "" } },
+
+    -- Set atril to always map on the tag named ""
+    { rule = { instance = "atril" },
+      properties = { tag = "", switchtotag = true } },
 }
 -- }}}
 
