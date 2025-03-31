@@ -186,10 +186,43 @@ awful.screen.connect_for_each_screen(function(s)
         },          
     }
 
+    -- Battery widget timer
+    s.mybattery_timer = gears.timer {
+        timeout   = 60,
+        call_now  = true,
+        autostart = true,
+        callback  = function()
+            awful.spawn.easy_async(
+                {"bash", "-c", "cat /sys/class/power_supply/BAT0/capacity"},
+                function(stdout)
+
+                    local children = s.mybattery:get_all_children()
+
+                    if tonumber(stdout) < 30 then
+                        children[2]:set_markup_silently("<span foreground='#606d84'></span>")
+                    else
+                        children[2]:set_markup_silently("<span foreground='#606d84'></span>")
+                    end
+
+                end
+            )
+        end
+    }
+
+    -- Battery widget tooltip
+    s.mybattery_tooltip = awful.tooltip { }
+    s.mybattery_tooltip:add_to_object(s.mybattery)
+
     -- Battery widget functions
-    --s.mybattery:connect_signal('button::release', function(self)
-    --    awful.spawn.easy_async("nada", function() end)
-    --end)
+    s.mybattery:connect_signal('mouse::enter', function()
+            awful.spawn.easy_async(
+                {"bash", "-c", "cat /sys/class/power_supply/BAT0/capacity"},
+                function(stdout)
+                    tooltip = stdout:gsub("\n[^\n]*$", "")
+                    s.mybattery_tooltip.text = "Battery: "..tooltip.."%"
+                end
+            )
+    end)
 
     -- Network widget
     s.mynetwork = wibox.layout {
@@ -206,9 +239,46 @@ awful.screen.connect_for_each_screen(function(s)
         },
     }
 
+    -- Network widget timer 
+    s.mynetwork_timer = gears.timer {
+        timeout   = 10, 
+        call_now  = true,
+        autostart = true,
+        callback  = function()
+            awful.spawn.easy_async(
+                {"bash", "-c", "cat /sys/class/net/w*/operstate"},
+                function(stdout)
+
+                    local children = s.mynetwork:get_all_children()
+
+                    if string.match(stdout, "down") then
+                        children[2]:set_markup_silently("<span foreground='#766577'>睊</span>")
+                    else
+                        children[2]:set_markup_silently("<span foreground='#766577'>直</span>")
+                    end 
+
+                end
+            )   
+        end
+    }
+
+    -- Network widget tooltip
+    s.mynetwork_tooltip = awful.tooltip { }
+    s.mynetwork_tooltip:add_to_object(s.mynetwork) 
+
     -- Network widget functions
     s.mynetwork:connect_signal('button::release', function(self)
         awful.spawn.easy_async(terminal.." -e ".."nmtui", function() end)
+    end)
+
+    s.mynetwork:connect_signal('mouse::enter', function()
+            awful.spawn.easy_async(
+                {"bash", "-c", "nmcli | grep '^wlp'  | cut -d ':' -f2 | sed 's/ connected to /Network: /g'"},
+                function(stdout)
+                    tooltip = stdout:gsub("\n[^\n]*$", "")
+                    s.mynetwork_tooltip.text = tooltip 
+                end
+            )
     end)
 
     -- Brightness widget
