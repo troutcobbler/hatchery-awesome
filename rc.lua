@@ -143,7 +143,7 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- Launcher widget functions
     s.mylauncher:connect_signal('button::release', function(self)
-        awful.spawn(launcher)
+        awful.spawn.easy_async(launcher, function() end)
     end)
 
     -- Taglist widget
@@ -177,7 +177,8 @@ awful.screen.connect_for_each_screen(function(s)
             top = 2, 
             bottom = 4, 
             widget = wibox.container.margin,
-            {   
+            {
+                id = "icon",
                 markup = "<span foreground='#606d84'></span>",
                 align = "center",
                 valign = "center",
@@ -196,12 +197,10 @@ awful.screen.connect_for_each_screen(function(s)
                 {"bash", "-c", "cat /sys/class/power_supply/BAT0/capacity"},
                 function(stdout)
 
-                    local children = s.mybattery:get_all_children()
-
                     if tonumber(stdout) < 30 then
-                        children[2]:set_markup_silently("<span foreground='#606d84'></span>")
+                        s.mybattery:get_children_by_id("icon")[1]:set_markup("<span foreground='#606d84'></span>")
                     else
-                        children[2]:set_markup_silently("<span foreground='#606d84'></span>")
+                        s.mybattery:get_children_by_id("icon")[1]:set_markup("<span foreground='#606d84'></span>")
                     end
 
                 end
@@ -231,6 +230,7 @@ awful.screen.connect_for_each_screen(function(s)
             bottom = 4,
             widget = wibox.container.margin,
             {
+                id = "icon",
                 markup = "<span foreground='#766577'>直</span>",
                 align = "center",
                 valign = "center",
@@ -249,12 +249,10 @@ awful.screen.connect_for_each_screen(function(s)
                 {"bash", "-c", "cat /sys/class/net/w*/operstate"},
                 function(stdout)
 
-                    local children = s.mynetwork:get_all_children()
-
                     if string.match(stdout, "down") then
-                        children[2]:set_markup_silently("<span foreground='#766577'>睊</span>")
+                        s.mynetwork:get_children_by_id("icon")[1]:set_markup("<span foreground='#766577'>睊</span>")
                     else
-                        children[2]:set_markup_silently("<span foreground='#766577'>直</span>")
+                        s.mynetwork:get_children_by_id("icon")[1]:set_markup("<span foreground='#766577'>直</span>")
                     end 
 
                 end
@@ -290,10 +288,12 @@ awful.screen.connect_for_each_screen(function(s)
             {
                 layout = wibox.layout.fixed.vertical,
                 {
+                    id            = "slider_box",
                     direction     = 'east',
                     layout        = wibox.container.rotate,
                     forced_height = 0,
                     {
+                        id               = "slider",
                         max_value        = 1,
                         value            = 0.33,
                         shape            = gears.shape.rounded_bar,
@@ -319,49 +319,47 @@ awful.screen.connect_for_each_screen(function(s)
         },
     }
 
+    -- Brightness widget variables
+    s.mybrightness.backlight = "amdgpu_bl0"
+
     -- Brightness widget functions
+    -- Show slider when entering widget
     s.mybrightness:connect_signal('mouse::enter', function(self)
 
-        -- Get table of children widgets
-        local children = self:get_all_children()
-
         -- Reflect brightness changes prior to opening widget
-        awful.spawn.easy_async("brightnessctl g amdgpu_bl0", function(stdout)
-            local volume = tonumber(stdout)/255
-            children[4]:set_value(volume)
+        awful.spawn.easy_async("brightnessctl g "..s.mybrightness.backlight, function(stdout)
+            local brightness = tonumber(stdout)/255
+            s.mybrightness:get_children_by_id("slider")[1]:set_value(brightness)
         end)
 
         -- Reveal slider
-        children[3].forced_height = 88
-
-        -- Change brightness on click
-        children[4]:connect_signal('button::release', function(lx, ly)
-
-            local brightness = math.floor(ly/88*100)
-
-            -- Slider is small make sure it get sets to 0 or 100
-            if brightness < 10 then
-                brightness = 0
-            elseif brightness > 90 then
-                brightness = 100
-            end
-
-            local command = "brightnessctl s "..tostring(brightness).."% ".."amdgpu_bl0"
-
-            awful.spawn.easy_async(command, function() end)
-
-            children[4]:set_value(brightness/100)
-
-            --naughty.notify{text = "Brightness: "..brightness.."%"}
-
-        end)
+        s.mybrightness:get_children_by_id("slider_box")[1].forced_height = 88
 
     end)
 
     -- Hide slider when leaving widget
     s.mybrightness:connect_signal('mouse::leave', function(self)
-        local children = self:get_all_children()
-        children[3].forced_height = 0
+        s.mybrightness:get_children_by_id("slider_box")[1].forced_height = 0
+    end)
+
+    -- Change brightness on click
+    s.mybrightness:get_children_by_id("slider")[1]:connect_signal('button::release', function(lx, ly)
+
+        local brightness = math.floor(ly/88*100)
+
+        -- Slider is small make sure it get sets to 0 or 100
+        if brightness < 10 then
+            brightness = 0
+        elseif brightness > 90 then
+            brightness = 100
+        end
+
+        local command = "brightnessctl s "..tostring(brightness).."% "..s.mybrightness.backlight
+
+        awful.spawn.easy_async(command, function() end)
+
+        s.mybrightness:get_children_by_id("slider")[1]:set_value(brightness/100)
+
     end)
 
     -- Volume widget
@@ -373,10 +371,12 @@ awful.screen.connect_for_each_screen(function(s)
             {
                 layout = wibox.layout.fixed.vertical,
                 {
+                    id            = "slider_box",
                     direction     = 'east',
                     layout        = wibox.container.rotate,
                     forced_height = 0,
                     {
+                        id               = "slider",
                         max_value        = 1,
                         value            = 0.33,
                         shape            = gears.shape.rounded_bar,
@@ -393,6 +393,7 @@ awful.screen.connect_for_each_screen(function(s)
                     },
                 },
                 {
+                    id = "icon",
                     markup = "<span foreground='#838d69'>墳</span>",
                     align = "center",
                     valign = "center",
@@ -403,53 +404,48 @@ awful.screen.connect_for_each_screen(function(s)
     }
 
     -- Volume widget functions
+    -- Show slider when entering widget
     s.myvolume:connect_signal('mouse::enter', function(self)
-
-        -- Get table of children widgets
-        local children = self:get_all_children()
 
         -- Reflect volume changes prior to opening widget
         awful.spawn.easy_async("pamixer --get-volume", function(stdout)
             local volume = tonumber(stdout)/100
-            children[4]:set_value(volume)
+            s.myvolume:get_children_by_id("slider")[1]:set_value(volume)
         end)
 
         -- Reveal slider
-        children[3].forced_height = 88
-
-        -- Change volume on click
-        children[4]:connect_signal('button::release', function(lx, ly)
-
-            local volume = math.floor(ly/88*100)
-
-            -- Slider is small make sure it get sets to 0 or 100
-            if volume < 10 then
-                volume = 0
-            elseif volume > 90 then
-                volume = 100
-            end
-
-            local command = "pamixer --set-volume "..tostring(volume)
-
-            awful.spawn.easy_async(command, function() end)
-            
-            children[4]:set_value(volume/100)
-           
-            --naughty.notify{text = "Volume: "..volume.."%" }
-
-        end)
-
-        -- launch pavucontrol when clicking on volume icon
-        children[5]:connect_signal('button::release', function()
-            awful.spawn("pavucontrol")
-        end)
+        s.myvolume:get_children_by_id("slider_box")[1].forced_height = 88
 
     end)
 
     -- Hide slider when leaving widget
     s.myvolume:connect_signal('mouse::leave', function(self)
-        local children = self:get_all_children()
-        children[3].forced_height = 0
+        s.myvolume:get_children_by_id("slider_box")[1].forced_height = 0
+    end)
+
+    -- Change volume on click
+    s.myvolume:get_children_by_id("slider")[1]:connect_signal('button::release', function(lx, ly)
+
+        local volume = math.floor(ly/88*100)
+
+        -- Slider is small make sure it get sets to 0 or 100
+        if volume < 10 then
+            volume = 0
+        elseif volume > 90 then
+            volume = 100
+        end
+
+        local command = "pamixer --set-volume "..tostring(volume)
+
+        awful.spawn.easy_async(command, function() end)
+
+        s.myvolume:get_children_by_id("slider")[1]:set_value(volume/100)
+           
+    end)
+
+    -- Launch pavucontrol when clicking on volume icon
+    s.myvolume:get_children_by_id("icon")[1]:connect_signal('button::release', function()
+        awful.spawn.easy_async("pavucontrol", function() end)
     end)
 
     -- Clock widget
