@@ -539,10 +539,6 @@ awful.screen.connect_for_each_screen(function(s)
     }
 
     -- Power widget functions
-    s.mypower:connect_signal('button::release', function(self)
-        awful.spawn.easy_async("slock", function() end)
-    end)
-
     s.mypower:connect_signal('mouse::enter', function(self)
 
         -- Get table of children widgets
@@ -558,6 +554,75 @@ awful.screen.connect_for_each_screen(function(s)
         local children = self:get_all_children()
         children[1].forced_height = 0
     end)
+
+    -- Poweroff popup widgets
+    poweroff_yes = wibox.widget {
+        text   = "Yes",
+        align = "center",
+        halign = "center",
+        widget = wibox.widget.textbox,
+    }
+
+    poweroff_no = wibox.widget {
+        text   = "No",
+        align = "center",
+        halign = "center",
+        widget = wibox.widget.textbox,
+    }
+
+    -- Poweroff popup
+    s.mypower_poweroff = awful.popup {
+        widget = {
+            {
+                {
+                    text   = 'Do you really want to Poweroff?',
+                    widget = wibox.widget.textbox
+                },
+                {
+                    {
+                        widget = poweroff_yes,
+                    },
+                    {
+                        widget = poweroff_no,
+                    },
+                    layout = wibox.layout.flex.horizontal,
+                },
+                layout = wibox.layout.fixed.vertical,
+            },
+            margins = 10,
+            widget  = wibox.container.margin
+        },
+        border_color = '#00ff00',
+        border_width = 5,
+        placement    = awful.placement.centered,
+        shape        = gears.shape.rounded_rect,
+        ontop        = true,
+        visible      = false,
+    }
+
+    -- Poweroff popup functions
+    poweroff_yes:connect_signal("button::release", function(self)
+        s.mypower_poweroff.visible = false
+        awful.spawn.easy_async("slock", function() end)
+    end)
+
+    poweroff_no:connect_signal("button::release", function(self)
+        s.mypower_poweroff.visible = false
+    end)
+
+    function poweroffButton()
+        local children = s.mypower:get_all_children()
+            children[10]:connect_signal('button::release', function()
+                if s.mypower_poweroff.visible == false then
+                    s.mypower_poweroff.visible = true
+                    naughty.notify{text = tostring(s.mypower_poweroff.visible)}
+                else
+                    s.mypower_poweroff.visible = false
+                    naughty.notify{text = tostring(s.mypower_poweroff.visible)}
+                end
+            end)
+    end
+    poweroffButton()
 
     -- Create some shapes for our widgets
     local bubble = function(cr, width, height)
