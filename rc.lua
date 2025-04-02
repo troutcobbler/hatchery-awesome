@@ -517,12 +517,12 @@ awful.screen.connect_for_each_screen(function(s)
     s.mypower = wibox.layout {
         layout = wibox.layout.fixed.vertical,
         {
-            id = "box",
+            id = "slider_box",
             layout = wibox.layout.fixed.vertical,
             forced_height = 0,
             {
                 widget = wibox.container.margin,
-                bottom = 4,
+                bottom = 6,
                 {
                     id = "suspend",
                     markup = "<span foreground='#838d69'>鈴</span>",
@@ -532,7 +532,7 @@ awful.screen.connect_for_each_screen(function(s)
                 },
             },
             {
-                bottom = 4,
+                bottom = 6,
                 widget = wibox.container.margin,
                 {
                     id = "reboot",
@@ -543,7 +543,7 @@ awful.screen.connect_for_each_screen(function(s)
                 },
             },
             {
-                bottom = 4,
+                bottom = 6,
                 widget = wibox.container.margin, 
                 {
                     id = "logout",
@@ -554,7 +554,7 @@ awful.screen.connect_for_each_screen(function(s)
                 },
             },
             {
-                bottom = 4,
+                bottom = 6,
                 widget = wibox.container.margin,
                 {
                     id = "lock",
@@ -581,17 +581,17 @@ awful.screen.connect_for_each_screen(function(s)
     -- Power widget functions
     -- Reveal menu 
     s.mypower:connect_signal('mouse::enter', function(self)
-        s.mypower:get_children_by_id("box")[1].forced_height = 108
+        s.mypower:get_children_by_id("slider_box")[1].forced_height = 116
     end)
 
     -- Hide menu when leaving widget
     s.mypower:connect_signal('mouse::leave', function(self)
-        s.mypower:get_children_by_id("box")[1].forced_height = 0
+        s.mypower:get_children_by_id("slider_box")[1].forced_height = 0
     end)
 
-    -- We don't need a popup for Lock
+    -- We don't need a popup for lock
     s.mypower:get_children_by_id("lock")[1]:connect_signal('button::release', function()
-        s.mypower:get_children_by_id("box")[1].forced_height = 0
+        s.mypower:get_children_by_id("slider_box")[1].forced_height = 0
         awful.spawn.easy_async("slock", function() end)
     end)
 
