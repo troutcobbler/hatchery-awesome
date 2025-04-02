@@ -524,6 +524,7 @@ awful.screen.connect_for_each_screen(function(s)
                 widget = wibox.container.margin,
                 bottom = 4,
                 {
+                    id = "suspend",
                     markup = "<span foreground='#838d69'>鈴</span>",
                     align = "center",
                     valign = "center",
@@ -534,6 +535,7 @@ awful.screen.connect_for_each_screen(function(s)
                 bottom = 4,
                 widget = wibox.container.margin,
                 {
+                    id = "reboot",
                     markup = "<span foreground='#b38d6a'>凌</span>",
                     align = "center",
                     valign = "center",
@@ -544,6 +546,7 @@ awful.screen.connect_for_each_screen(function(s)
                 bottom = 4,
                 widget = wibox.container.margin, 
                 {
+                    id = "logout",
                     markup = "<span foreground='#766577'>﫼</span>",
                     align = "center",
                     valign = "center",
@@ -554,6 +557,7 @@ awful.screen.connect_for_each_screen(function(s)
                 bottom = 4,
                 widget = wibox.container.margin,
                 {
+                    id = "lock",
                     markup = "<span foreground='#606d84'></span>",
                     align = "center",
                     valign = "center",
@@ -565,6 +569,7 @@ awful.screen.connect_for_each_screen(function(s)
             bottom = 2,
             widget = wibox.container.margin,
             {
+                id = "poweroff",
                 markup = "<span foreground='#9d5b61'>襤</span>",
                 align = "center",
                 valign = "center",
@@ -584,30 +589,37 @@ awful.screen.connect_for_each_screen(function(s)
         s.mypower:get_children_by_id("box")[1].forced_height = 0
     end)
 
-    -- Poweroff popup widgets
-    poweroff_cancel = wibox.widget {
+    -- We don't need a popup for Lock
+    s.mypower:get_children_by_id("lock")[1]:connect_signal('button::release', function()
+        s.mypower:get_children_by_id("box")[1].forced_height = 0
+        awful.spawn.easy_async("slock", function() end)
+    end)
+
+    -- Power widget popups
+    -- Suspend popup widgets
+    suspend_cancel = wibox.widget {
         text   = "CANCEL",
         align = "center",
         halign = "center",
         widget = wibox.widget.textbox,
     }
 
-    poweroff_yes = wibox.widget {
-        markup = "<span foreground='#9d5b61'>YES</span>",
+    suspend_yes = wibox.widget {
+        markup = "<span foreground='#838d69'>YES</span>",
         align = "center",
         halign = "center",
         widget = wibox.widget.textbox,
     }
 
-    -- Poweroff popup
-    s.mypower.poweroff = awful.popup {
+    -- Suspend popup
+    s.mypower.suspend = awful.popup {
         widget = {
             {
                 {
                     widget = wibox.container.margin,
                     margins = 20,
-                    {   
-                        text   = 'Poweroff this computer?',
+                    {
+                        text   = 'Suspend this computer?',
                         align = "center",
                         halign = "center",
                         widget = wibox.widget.textbox
@@ -618,7 +630,307 @@ awful.screen.connect_for_each_screen(function(s)
                         top = 4,
                         bottom = 4,
                         left = 22,
-                        right = 12, 
+                        right = 12,
+                        widget = wibox.container.margin,
+                        {
+                            bg     = '#2d2d2d',
+                            shape = bubble,
+                            widget = wibox.container.background,
+                            {
+                                margins = 5,
+                                widget = wibox.container.margin,
+                                {
+                                    widget = suspend_cancel,
+                                },
+                            },
+                        },
+                    },
+                    {
+                        top = 4,
+                        bottom = 4,
+                        left = 12,
+                        right = 22,
+                        widget = wibox.container.margin,
+                        {
+                            bg     = '#2d2d2d',
+                            shape = bubble,
+                            widget = wibox.container.background,
+                            {
+                                margins = 5,
+                                widget = wibox.container.margin,
+                                {
+                                    widget = suspend_yes,
+                                },
+                            },
+                        },
+                    },
+                    layout = wibox.layout.flex.horizontal,
+                },
+                layout = wibox.layout.fixed.vertical,
+            },
+            margins = 10,
+            widget  = wibox.container.margin
+        },
+        placement    = awful.placement.centered,
+        ontop        = true,
+        visible      = false,
+        minimum_width = 480,
+        minimum_height = 120,
+    }
+
+    -- Suspend popup functions
+    suspend_cancel:connect_signal("button::release", function(self)
+        s.mypower.suspend.visible = false
+    end)
+
+    suspend_yes:connect_signal("button::release", function(self)
+        s.mypower.suspend.visible = false
+        awful.spawn.with_shell("systemctl suspend && slock")
+    end)
+
+    s.mypower:get_children_by_id("suspend")[1]:connect_signal('button::release', function()
+        if s.mypower.suspend.visible == false then
+            s.mypower.suspend.visible = true
+        else
+            s.mypower.suspend.visible = false
+        end
+    end)
+
+    -- Reboot popup widgets
+    reboot_cancel = wibox.widget {
+        text   = "CANCEL",
+        align = "center",
+        halign = "center",
+        widget = wibox.widget.textbox,
+    }
+
+    reboot_yes = wibox.widget {
+        markup = "<span foreground='#b38d6a'>YES</span>",
+        align = "center",
+        halign = "center",
+        widget = wibox.widget.textbox,
+    }
+
+    -- Reboot popup
+    s.mypower.reboot = awful.popup {
+        widget = {
+            {
+                {
+                    widget = wibox.container.margin,
+                    margins = 20,
+                    {
+                        text   = 'Reboot this computer?',
+                        align = "center",
+                        halign = "center",
+                        widget = wibox.widget.textbox
+                    },
+                },
+                {
+                    {
+                        top = 4,
+                        bottom = 4,
+                        left = 22,
+                        right = 12,
+                        widget = wibox.container.margin,
+                        {
+                            bg     = '#2d2d2d',
+                            shape = bubble,
+                            widget = wibox.container.background,
+                            {
+                                margins = 5,
+                                widget = wibox.container.margin,
+                                {
+                                    widget = reboot_cancel,
+                                },
+                            },
+                        },
+                    },
+                    {
+                        top = 4,
+                        bottom = 4,
+                        left = 12,
+                        right = 22,
+                        widget = wibox.container.margin,
+                        {
+                            bg     = '#2d2d2d',
+                            shape = bubble,
+                            widget = wibox.container.background,
+                            {
+                                margins = 5,
+                                widget = wibox.container.margin,
+                                {
+                                    widget = reboot_yes,
+                                },
+                            },
+                        },
+                    },
+                    layout = wibox.layout.flex.horizontal,
+                },
+                layout = wibox.layout.fixed.vertical,
+            },
+            margins = 10,
+            widget  = wibox.container.margin
+        },
+        placement    = awful.placement.centered,
+        ontop        = true,
+        visible      = false,
+        minimum_width = 480,
+        minimum_height = 120,
+    }
+
+    -- Reboot popup functions
+    reboot_cancel:connect_signal("button::release", function(self)
+        s.mypower.reboot.visible = false
+    end)
+
+    reboot_yes:connect_signal("button::release", function(self)
+        s.mypower.reboot.visible = false
+        awful.spawn.easy_async("systemctl reboot", function() end)
+    end)
+
+    s.mypower:get_children_by_id("reboot")[1]:connect_signal('button::release', function()
+        if s.mypower.reboot.visible == false then
+            s.mypower.reboot.visible = true
+        else
+            s.mypower.reboot.visible = false
+        end
+    end)
+
+    -- Logout popup widgets
+    logout_cancel = wibox.widget {
+        text   = "CANCEL",
+        align = "center",
+        halign = "center",
+        widget = wibox.widget.textbox,
+    }
+
+    logout_yes = wibox.widget {
+        markup = "<span foreground='#766577'>YES</span>",
+        align = "center",
+        halign = "center",
+        widget = wibox.widget.textbox,
+    }
+
+    -- Logout popup
+    s.mypower.logout = awful.popup {
+        widget = {
+            {
+                {
+                    widget = wibox.container.margin,
+                    margins = 20,
+                    {
+                        text   = 'Logout of this computer?',
+                        align = "center",
+                        halign = "center",
+                        widget = wibox.widget.textbox
+                    },
+                },
+                {
+                    {
+                        top = 4,
+                        bottom = 4,
+                        left = 22,
+                        right = 12,
+                        widget = wibox.container.margin,
+                        {
+                            bg     = '#2d2d2d',
+                            shape = bubble,
+                            widget = wibox.container.background,
+                            {
+                                margins = 5,
+                                widget = wibox.container.margin,
+                                {
+                                    widget = logout_cancel,
+                                },
+                            },
+                        },
+                    },
+                    {
+                        top = 4,
+                        bottom = 4,
+                        left = 12,
+                        right = 22,
+                        widget = wibox.container.margin,
+                        {
+                            bg     = '#2d2d2d',
+                            shape = bubble,
+                            widget = wibox.container.background,
+                            {
+                                margins = 5,
+                                widget = wibox.container.margin,
+                                {
+                                    widget = logout_yes,
+                                },
+                            },
+                        },
+                    },
+                    layout = wibox.layout.flex.horizontal,
+                },
+                layout = wibox.layout.fixed.vertical,
+            },
+            margins = 10,
+            widget  = wibox.container.margin
+        },
+        placement    = awful.placement.centered,
+        ontop        = true,
+        visible      = false,
+        minimum_width = 480,
+        minimum_height = 120,
+    }
+
+    -- Logout popup functions
+    logout_cancel:connect_signal("button::release", function(self)
+        s.mypower.logout.visible = false
+    end)
+
+    logout_yes:connect_signal("button::release", function(self)
+        s.mypower.logout.visible = false
+        awesome.quit()
+    end)
+
+    s.mypower:get_children_by_id("logout")[1]:connect_signal('button::release', function()
+        if s.mypower.logout.visible == false then
+            s.mypower.logout.visible = true
+        else
+            s.mypower.logout.visible = false
+        end
+    end)
+
+    -- Poweroff popup widgets
+    poweroff_cancel = wibox.widget {
+        text   = "CANCEL",
+        align = "center",   
+        halign = "center",  
+        widget = wibox.widget.textbox,
+    }                       
+                            
+    poweroff_yes = wibox.widget {
+        markup = "<span foreground='#9d5b61'>YES</span>",
+        align = "center",
+        halign = "center",
+        widget = wibox.widget.textbox,
+    }               
+             
+    -- Poweroff popup
+    s.mypower.poweroff = awful.popup {
+        widget = {  
+            {   
+                {       
+                    widget = wibox.container.margin,
+                    margins = 20,
+                    {   
+                        text   = 'Poweroff this computer?',
+                        align = "center",
+                        halign = "center",
+                        widget = wibox.widget.textbox
+                    }, 
+                },      
+                {       
+                    {
+                        top = 4,
+                        bottom = 4,
+                        left = 22,
+                        right = 12,
                         widget = wibox.container.margin,
                         {
                             bg     = '#2d2d2d',
@@ -639,7 +951,7 @@ awful.screen.connect_for_each_screen(function(s)
                         left = 12,
                         right = 22,
                         widget = wibox.container.margin,
-                        {
+                        {   
                             bg     = '#2d2d2d',
                             shape = bubble,
                             widget = wibox.container.background,
@@ -651,44 +963,38 @@ awful.screen.connect_for_each_screen(function(s)
                                 },
                             },
                         },
-                    },
+                    },  
                     layout = wibox.layout.flex.horizontal,
-                },
+                },  
                 layout = wibox.layout.fixed.vertical,
-            },
+            },          
             margins = 10,
             widget  = wibox.container.margin
-        },
+        },              
         placement    = awful.placement.centered,
         ontop        = true,
         visible      = false,
         minimum_width = 480,
-        minimum_height = 120,
-    }
-
-    -- Poweroff popup functions
-    poweroff_yes:connect_signal("button::release", function(self)
-        s.mypower.poweroff.visible = false
-        awful.spawn.easy_async("slock", function() end)
-    end)
-
+        minimum_height = 120, 
+    }                   
+                        
+    -- Poweroff popup functions 
     poweroff_cancel:connect_signal("button::release", function(self)
         s.mypower.poweroff.visible = false
+    end)                    
+                            
+    poweroff_yes:connect_signal("button::release", function(self)
+        s.mypower.poweroff.visible = false
+        awful.spawn.easy_async("systemctl poweroff", function() end)
     end)
 
-    function poweroffButton()
-        local children = s.mypower:get_all_children()
-            children[10]:connect_signal('button::release', function()
-                if s.mypower.poweroff.visible == false then
-                    s.mypower.poweroff.visible = true
-                    naughty.notify{text = tostring(s.mypower.poweroff.visible)}
-                else
-                    s.mypower.poweroff.visible = false
-                    naughty.notify{text = tostring(s.mypower.poweroff.visible)}
-                end
-            end)
-    end
-    poweroffButton()
+    s.mypower:get_children_by_id("poweroff")[1]:connect_signal('button::release', function()
+        if s.mypower.poweroff.visible == false then
+            s.mypower.poweroff.visible = true
+        else
+            s.mypower.poweroff.visible = false
+        end
+    end)
 
     -- Create the wibox
     s.mywibox = awful.wibar({ position = "left", screen = s, width = 48 })
