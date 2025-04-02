@@ -129,6 +129,12 @@ awful.screen.connect_for_each_screen(function(s)
     -- Each screen has its own tag table.
     awful.tag({ "", "", "", "", "ﱘ", "", }, s, awful.layout.layouts[1])
 
+    -- Shapes
+    -- Bubble 
+    local bubble = function(cr, width, height)
+        gears.shape.rounded_rect(cr, width, height, 5)
+    end
+
     -- Tray widgets
     -- Launcher widget
     s.mylauncher = wibox.layout {
@@ -209,16 +215,16 @@ awful.screen.connect_for_each_screen(function(s)
     }
 
     -- Battery widget tooltip
-    s.mybattery_tooltip = awful.tooltip { }
-    s.mybattery_tooltip:add_to_object(s.mybattery)
+    s.mybattery.tooltip = awful.tooltip { }
+    s.mybattery.tooltip:add_to_object(s.mybattery)
 
-    -- Battery widget functions
-    s.mybattery:connect_signal('mouse::enter', function()
+    -- Battery widget tooltip function
+    s.mybattery:get_children_by_id("icon")[1]:connect_signal('mouse::enter', function()
             awful.spawn.easy_async(
                 {"bash", "-c", "cat /sys/class/power_supply/BAT0/capacity"},
                 function(stdout)
                     tooltip = stdout:gsub("\n[^\n]*$", "")
-                    s.mybattery_tooltip.text = "Battery: "..tooltip.."%"
+                    s.mybattery.tooltip.text = "Battery: "..tooltip.."%"
                 end
             )
     end)
@@ -260,21 +266,22 @@ awful.screen.connect_for_each_screen(function(s)
         end
     }
 
-    -- Network widget tooltip
-    s.mynetwork_tooltip = awful.tooltip { }
-    s.mynetwork_tooltip:add_to_object(s.mynetwork) 
-
     -- Network widget functions
     s.mynetwork:connect_signal('button::release', function(self)
         awful.spawn.easy_async(terminal.." -e ".."nmtui", function() end)
     end)
 
-    s.mynetwork:connect_signal('mouse::enter', function()
+    -- Network widget tooltip
+    s.mynetwork.tooltip = awful.tooltip { }
+    s.mynetwork.tooltip:add_to_object(s.mynetwork)
+
+    -- Network widget tooltip function
+    s.mynetwork:get_children_by_id("icon")[1]:connect_signal('mouse::enter', function()
             awful.spawn.easy_async(
                 {"bash", "-c", "nmcli | grep '^wlp'  | cut -d ':' -f2 | sed 's/ connected to /Network: /g'"},
                 function(stdout)
                     tooltip = stdout:gsub("\n[^\n]*$", "")
-                    s.mynetwork_tooltip.text = tooltip 
+                    s.mynetwork.tooltip.text = tooltip 
                 end
             )
     end)
@@ -310,8 +317,9 @@ awful.screen.connect_for_each_screen(function(s)
                     },
                 },
                 {
+                    id     = "icon",
                     markup = "<span foreground='#b38d6a'></span>",
-                    align = "center",
+                    align  = "center",
                     valign = "center",
                     widget = wibox.widget.textbox,
                 },
@@ -319,7 +327,7 @@ awful.screen.connect_for_each_screen(function(s)
         },
     }
 
-    -- Brightness widget variables
+    -- Brightness widget variables 
     s.mybrightness.backlight = "amdgpu_bl0"
 
     -- Brightness widget functions
@@ -360,6 +368,21 @@ awful.screen.connect_for_each_screen(function(s)
 
         s.mybrightness:get_children_by_id("slider")[1]:set_value(brightness/100)
 
+    end)
+
+    -- Brightness widget tooltip
+    s.mybrightness.tooltip = awful.tooltip { }
+    s.mybrightness.tooltip:add_to_object(s.mybrightness:get_children_by_id("icon")[1])
+
+    -- Brightness widget tooltip function
+    s.mybrightness:get_children_by_id("icon")[1]:connect_signal('mouse::enter', function()
+            awful.spawn.easy_async(
+                {"bash", "-c", "brightnessctl g "..s.mybrightness.backlight},
+                function(stdout)
+                    tooltip = tostring(math.floor(tonumber(stdout)/255*100))
+                    s.mybrightness.tooltip.text = "Brightness: "..tooltip.."%"
+                end
+            )
     end)
 
     -- Volume widget
@@ -448,6 +471,21 @@ awful.screen.connect_for_each_screen(function(s)
         awful.spawn.easy_async("pavucontrol", function() end)
     end)
 
+    -- Volume widget tooltip
+    s.myvolume.tooltip = awful.tooltip { }
+    s.myvolume.tooltip:add_to_object(s.myvolume:get_children_by_id("icon")[1])
+
+    -- Volume widget tooltip function
+    s.myvolume:get_children_by_id("icon")[1]:connect_signal('mouse::enter', function()
+            awful.spawn.easy_async(
+                {"bash", "-c", "pamixer --get-volume"},
+                function(stdout)
+                    tooltip = stdout:gsub("\n[^\n]*$", "")
+                    s.myvolume.tooltip.text = "Volume: "..tooltip.."%"
+                end
+            )
+    end)
+
     -- Clock widget
     s.myclock = wibox.layout {
         layout = wibox.layout.fixed.vertical,
@@ -479,6 +517,7 @@ awful.screen.connect_for_each_screen(function(s)
     s.mypower = wibox.layout {
         layout = wibox.layout.fixed.vertical,
         {
+            id = "box",
             layout = wibox.layout.fixed.vertical,
             forced_height = 0,
             {
@@ -535,51 +574,83 @@ awful.screen.connect_for_each_screen(function(s)
     }
 
     -- Power widget functions
+    -- Reveal menu 
     s.mypower:connect_signal('mouse::enter', function(self)
-
-        -- Get table of children widgets
-        local children = self:get_all_children()
-
-        -- Reveal menu 
-        children[1].forced_height = 108
-
+        s.mypower:get_children_by_id("box")[1].forced_height = 108
     end)
 
-    -- Hide slider when leaving widget
+    -- Hide menu when leaving widget
     s.mypower:connect_signal('mouse::leave', function(self)
-        local children = self:get_all_children()
-        children[1].forced_height = 0
+        s.mypower:get_children_by_id("box")[1].forced_height = 0
     end)
 
     -- Poweroff popup widgets
-    poweroff_yes = wibox.widget {
-        text   = "Yes",
+    poweroff_cancel = wibox.widget {
+        text   = "CANCEL",
         align = "center",
         halign = "center",
         widget = wibox.widget.textbox,
     }
 
-    poweroff_no = wibox.widget {
-        text   = "No",
+    poweroff_yes = wibox.widget {
+        markup = "<span foreground='#9d5b61'>YES</span>",
         align = "center",
         halign = "center",
         widget = wibox.widget.textbox,
     }
 
     -- Poweroff popup
-    s.mypower_poweroff = awful.popup {
+    s.mypower.poweroff = awful.popup {
         widget = {
             {
                 {
-                    text   = 'Do you really want to Poweroff?',
-                    widget = wibox.widget.textbox
+                    widget = wibox.container.margin,
+                    margins = 20,
+                    {   
+                        text   = 'Poweroff this computer?',
+                        align = "center",
+                        halign = "center",
+                        widget = wibox.widget.textbox
+                    },
                 },
                 {
                     {
-                        widget = poweroff_yes,
+                        top = 4,
+                        bottom = 4,
+                        left = 22,
+                        right = 12, 
+                        widget = wibox.container.margin,
+                        {
+                            bg     = '#2d2d2d',
+                            shape = bubble,
+                            widget = wibox.container.background,
+                            {
+                                margins = 5,
+                                widget = wibox.container.margin,
+                                {
+                                    widget = poweroff_cancel,
+                                },
+                            },
+                        },
                     },
                     {
-                        widget = poweroff_no,
+                        top = 4,
+                        bottom = 4,
+                        left = 12,
+                        right = 22,
+                        widget = wibox.container.margin,
+                        {
+                            bg     = '#2d2d2d',
+                            shape = bubble,
+                            widget = wibox.container.background,
+                            {
+                                margins = 5,
+                                widget = wibox.container.margin,
+                                {
+                                    widget = poweroff_yes,
+                                },
+                            },
+                        },
                     },
                     layout = wibox.layout.flex.horizontal,
                 },
@@ -588,42 +659,36 @@ awful.screen.connect_for_each_screen(function(s)
             margins = 10,
             widget  = wibox.container.margin
         },
-        border_color = '#00ff00',
-        border_width = 5,
         placement    = awful.placement.centered,
-        shape        = gears.shape.rounded_rect,
         ontop        = true,
         visible      = false,
+        minimum_width = 480,
+        minimum_height = 120,
     }
 
     -- Poweroff popup functions
     poweroff_yes:connect_signal("button::release", function(self)
-        s.mypower_poweroff.visible = false
+        s.mypower.poweroff.visible = false
         awful.spawn.easy_async("slock", function() end)
     end)
 
-    poweroff_no:connect_signal("button::release", function(self)
-        s.mypower_poweroff.visible = false
+    poweroff_cancel:connect_signal("button::release", function(self)
+        s.mypower.poweroff.visible = false
     end)
 
     function poweroffButton()
         local children = s.mypower:get_all_children()
             children[10]:connect_signal('button::release', function()
-                if s.mypower_poweroff.visible == false then
-                    s.mypower_poweroff.visible = true
-                    naughty.notify{text = tostring(s.mypower_poweroff.visible)}
+                if s.mypower.poweroff.visible == false then
+                    s.mypower.poweroff.visible = true
+                    naughty.notify{text = tostring(s.mypower.poweroff.visible)}
                 else
-                    s.mypower_poweroff.visible = false
-                    naughty.notify{text = tostring(s.mypower_poweroff.visible)}
+                    s.mypower.poweroff.visible = false
+                    naughty.notify{text = tostring(s.mypower.poweroff.visible)}
                 end
             end)
     end
     poweroffButton()
-
-    -- Create some shapes for our widgets
-    local bubble = function(cr, width, height)
-        gears.shape.rounded_rect(cr, width, height, 5)
-    end
 
     -- Create the wibox
     s.mywibox = awful.wibar({ position = "left", screen = s, width = 48 })
