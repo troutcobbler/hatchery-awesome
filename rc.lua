@@ -488,6 +488,7 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- Clock widget
     s.myclock = wibox.layout {
+        id = "clock",
         layout = wibox.layout.fixed.vertical,
         {
             align = "center",
@@ -503,15 +504,110 @@ awful.screen.connect_for_each_screen(function(s)
         },
     }
 
-    -- Clock functions
-    -- Calendar widget
-    s.mycalendar = awful.widget.calendar_popup.month {
-        start_sunday = true,
-        margin = 20,
+    -- Calendar widget (clock functions below)
+    -- Calendar style
+    calendar_style = {}
+
+    calendar_style.month   = { padding      = 8,
+                       bg_color     = '#202020',
+                       border_width = 2,
+                       shape        = bubble
     }
 
-    -- Attach calendar to clock
-    s.mycalendar:attach(s.myclock, "bl")
+    calendar_style.normal  = { shape    = bubble }
+
+    calendar_style.focus   = { fg_color = '#202020',
+                       bg_color = '#808fa0',
+                       markup   = function(t) return '<b>' .. t .. '</b>' end,
+                       shape    = bubble
+    }
+
+    calendar_style.header  = { fg_color = '#a7a7a7',
+                       bg_color     = '#2d2d2d',
+                       markup   = function(t) return '<b>' .. t .. '</b>' end,
+                       shape    = bubble
+    }
+
+    calendar_style.weekday = { fg_color = '#a7a7a7',
+                       markup   = function(t) return '<b>' .. t .. '</b>' end,
+                       shape    = bubble 
+    }
+
+    function decorate_calendar(widget, flag, date)
+        if flag=='monthheader' and not styles.monthheader then
+            flag = 'header'
+        end
+
+        local props = calendar_style[flag] or {}
+
+        if props.markup and widget.get_text and widget.set_markup then
+            widget:set_markup(props.markup(widget:get_text()))
+        end
+
+        -- Change bg color for weekends
+        local d = {year=date.year, month=(date.month or 1), day=(date.day or 1)}
+        local weekday = tonumber(os.date('%w', os.time(d)))
+        local default_bg = (weekday==0 or weekday==6) and '#202020' or '#2d2d2d'
+        local default_fg = (weekday==0 or weekday==6) and '#605f61' or '#a7a7a7'
+        local ret = wibox.widget {
+            {
+                widget,
+                margins = (props.padding or 2) + (props.border_width or 0),
+                widget  = wibox.container.margin
+            },
+            shape              = props.shape,
+            shape_border_color = props.border_color or '#2d2d2d',
+            shape_border_width = props.border_width or 0,
+            fg                 = props.fg_color or default_fg,
+            bg                 = props.bg_color or default_bg,
+            widget             = wibox.container.background
+        }
+        return ret
+    end
+
+    -- Calendar widget
+    calendar = wibox.widget {
+        date     = os.date('*t'),
+        fn_embed = decorate_calendar,
+        font     = beautiful.font,
+        start_sunday = true,
+        widget   = wibox.widget.calendar.month
+    }
+
+    -- Calendar popup
+    s.myclock.calendar = awful.popup {
+        widget = calendar,
+        visible      = false,
+        ontop        = true,
+        placement    = awful.placement.bottom_left,
+    }
+
+    -- Calendar state variable
+    calendar_toggled = false
+
+    -- Clock functions
+    s.myclock:get_children_by_id("clock")[1]:connect_signal('button::release', function()
+        if calendar_toggled == false then
+            calendar_toggled = true
+            s.myclock.calendar.visible = true
+        else
+            calendar_toggled = false
+            s.myclock.calendar.visible = false 
+        end
+    end)
+
+    s.myclock:get_children_by_id("clock")[1]:connect_signal('mouse::enter', function()
+        awful.placement.bottom_left(s.myclock.calendar, { margins = { bottom = 20, left = 68 } })
+        if calendar_toggled == false then
+            s.myclock.calendar.visible = true
+        end
+    end)
+
+    s.myclock:get_children_by_id("clock")[1]:connect_signal('mouse::leave', function()
+        if calendar_toggled == false then
+            s.myclock.calendar.visible = false 
+        end
+    end)
 
     -- Power widget
     s.mypower = wibox.layout {
