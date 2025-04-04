@@ -96,6 +96,14 @@ beautiful.init({
     wallpaper = true,
 })
 
+-- Notifications
+local nconf = naughty.config
+nconf.padding = 20
+nconf.defaults.margin = 20
+nconf.defaults.timeout = 3
+nconf.presets.critical.bg = background 
+nconf.presets.critical.fg = foreground
+
 -- This is used later as the default terminal and editor to run.
 terminal = "xfce4-terminal"
 launcher = "rofi_run.sh"
