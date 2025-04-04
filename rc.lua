@@ -44,11 +44,57 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
-beautiful.init(gears.filesystem.get_configuration_dir () .. "theme.lua")
+-- Colors
+foreground = "#a7a7a7"
+background = "#202020"
+color0     = "#2d2d2d"
+color8     = "#605f61"
+color1     = "#9d5b61"
+color9     = "#9d5b61"
+color2     = "#838d69"
+color10    = "#838d69"
+color3     = "#b38d6a"
+color11    = "#b38d6a"
+color4     = "#606d84"
+color12    = "#606d84"
+color5     = "#766577"
+color13    = "#766577"
+color6     = "#808fa0"
+color14    = "#808fa0"
+color7     = "#9c9a9a"
+color15    = "#9c9a9a"
 
-beautiful.gap_single_client = false
-beautiful.font = "Inter 15"
-beautiful.taglist_spacing = 6
+beautiful.init({
+    -- Fonts
+    font = "Inter 15",
+
+    -- Background & foreground
+    bg_normal = background,
+    fg_normal = foreground,
+
+    -- Borders & gaps
+    border_focus      = "#6699cc",
+    border_normal     = "#444444", 
+    border_width      = 1,
+    useless_gap       = 2,
+    gap_single_client = false,
+
+    -- Taglist
+    taglist_bg_focus    = color0,
+    taglist_fg_focus    = foreground,
+    taglist_bg_occupied = color0,
+    taglist_fg_occupied = foreground,
+    taglist_bg_empty    = color0,
+    taglist_fg_empty    = color8,
+    taglist_spacing     = 6,
+
+    -- Tooltips
+    tooltip_bg = color0,
+    tooltip_fg = foreground,
+
+    -- Wallpaper
+    wallpaper = true,
+})
 
 -- This is used later as the default terminal and editor to run.
 terminal = "xfce4-terminal"
@@ -68,20 +114,6 @@ modkey = "Mod1"
 awful.layout.layouts = {
     awful.layout.suit.spiral.dwindle,
     awful.layout.suit.floating,
-    awful.layout.suit.tile,
-    awful.layout.suit.tile.left,
-    awful.layout.suit.tile.bottom,
-    awful.layout.suit.tile.top,
-    awful.layout.suit.fair,
-    awful.layout.suit.fair.horizontal,
-    awful.layout.suit.spiral,
-    awful.layout.suit.max,
-    awful.layout.suit.max.fullscreen,
-    awful.layout.suit.magnifier,
-    awful.layout.suit.corner.nw,
-    -- awful.layout.suit.corner.ne,
-    -- awful.layout.suit.corner.sw,
-    -- awful.layout.suit.corner.se,
 }
 -- }}}
 
@@ -140,7 +172,7 @@ awful.screen.connect_for_each_screen(function(s)
     s.mylauncher = wibox.layout {
         layout = wibox.layout.fixed.vertical,
         {
-            markup = "<span foreground='#808fa0'></span>",
+            markup = "<span foreground='"..color6.."'></span>",
             align = "center",
             valign = "center",
             widget = wibox.widget.textbox,
@@ -185,7 +217,7 @@ awful.screen.connect_for_each_screen(function(s)
             widget = wibox.container.margin,
             {
                 id = "icon",
-                markup = "<span foreground='#606d84'></span>",
+                markup = "<span foreground='"..color4.."'></span>",
                 align = "center",
                 valign = "center",
                 widget = wibox.widget.textbox,
@@ -204,9 +236,9 @@ awful.screen.connect_for_each_screen(function(s)
                 function(stdout)
 
                     if tonumber(stdout) < 30 then
-                        s.mybattery:get_children_by_id("icon")[1]:set_markup("<span foreground='#606d84'></span>")
+                        s.mybattery:get_children_by_id("icon")[1]:set_markup("<span foreground='"..color4.."'></span>")
                     else
-                        s.mybattery:get_children_by_id("icon")[1]:set_markup("<span foreground='#606d84'></span>")
+                        s.mybattery:get_children_by_id("icon")[1]:set_markup("<span foreground='"..color4.."'></span>")
                     end
 
                 end
@@ -237,7 +269,7 @@ awful.screen.connect_for_each_screen(function(s)
             widget = wibox.container.margin,
             {
                 id = "icon",
-                markup = "<span foreground='#766577'>直</span>",
+                markup = "<span foreground='"..color5.."'>直</span>",
                 align = "center",
                 valign = "center",
                 widget = wibox.widget.textbox,
@@ -256,9 +288,9 @@ awful.screen.connect_for_each_screen(function(s)
                 function(stdout)
 
                     if string.match(stdout, "down") then
-                        s.mynetwork:get_children_by_id("icon")[1]:set_markup("<span foreground='#766577'>睊</span>")
+                        s.mynetwork:get_children_by_id("icon")[1]:set_markup("<span foreground='"..color5.."'>睊</span>")
                     else
-                        s.mynetwork:get_children_by_id("icon")[1]:set_markup("<span foreground='#766577'>直</span>")
+                        s.mynetwork:get_children_by_id("icon")[1]:set_markup("<span foreground='"..color5.."'>直</span>")
                     end 
 
                 end
@@ -305,8 +337,8 @@ awful.screen.connect_for_each_screen(function(s)
                         value            = 0.33,
                         shape            = gears.shape.rounded_bar,
                         bar_shape        = gears.shape.rounded_bar,
-                        background_color = "#202020",
-                        color            = "#b38d6a",
+                        background_color = background,
+                        color            = color3,
                         margins = {
                             top    = 11,
                             bottom = 11,
@@ -318,7 +350,7 @@ awful.screen.connect_for_each_screen(function(s)
                 },
                 {
                     id     = "icon",
-                    markup = "<span foreground='#b38d6a'></span>",
+                    markup = "<span foreground='"..color3.."'></span>",
                     align  = "center",
                     valign = "center",
                     widget = wibox.widget.textbox,
@@ -404,8 +436,8 @@ awful.screen.connect_for_each_screen(function(s)
                         value            = 0.33,
                         shape            = gears.shape.rounded_bar,
                         bar_shape        = gears.shape.rounded_bar,
-                        background_color = "#202020",
-                        color            = "#838d69",
+                        background_color = background,
+                        color            = color2,
                         margins = {
                             top    = 11,
                             bottom = 11,
@@ -417,7 +449,7 @@ awful.screen.connect_for_each_screen(function(s)
                 },
                 {
                     id = "icon",
-                    markup = "<span foreground='#838d69'>墳</span>",
+                    markup = "<span foreground='"..color2.."'>墳</span>",
                     align = "center",
                     valign = "center",
                     widget = wibox.widget.textbox,
@@ -509,26 +541,26 @@ awful.screen.connect_for_each_screen(function(s)
     calendar_style = {}
 
     calendar_style.month   = { padding      = 8,
-                       bg_color     = '#202020',
+                       bg_color     = background,
                        border_width = 2,
                        shape        = bubble
     }
 
     calendar_style.normal  = { shape    = bubble }
 
-    calendar_style.focus   = { fg_color = '#202020',
-                       bg_color = '#808fa0',
+    calendar_style.focus   = { fg_color = background,
+                       bg_color = color6,
                        markup   = function(t) return '<b>' .. t .. '</b>' end,
                        shape    = bubble
     }
 
-    calendar_style.header  = { fg_color = '#a7a7a7',
-                       bg_color     = '#2d2d2d',
+    calendar_style.header  = { fg_color = foreground,
+                       bg_color     = color0,
                        markup   = function(t) return '<b>' .. t .. '</b>' end,
                        shape    = bubble
     }
 
-    calendar_style.weekday = { fg_color = '#a7a7a7',
+    calendar_style.weekday = { fg_color = foreground,
                        markup   = function(t) return '<b>' .. t .. '</b>' end,
                        shape    = bubble 
     }
@@ -547,8 +579,8 @@ awful.screen.connect_for_each_screen(function(s)
         -- Change bg color for weekends
         local d = {year=date.year, month=(date.month or 1), day=(date.day or 1)}
         local weekday = tonumber(os.date('%w', os.time(d)))
-        local default_bg = (weekday==0 or weekday==6) and '#202020' or '#2d2d2d'
-        local default_fg = (weekday==0 or weekday==6) and '#605f61' or '#a7a7a7'
+        local default_bg = (weekday==0 or weekday==6) and background or color0
+        local default_fg = (weekday==0 or weekday==6) and color8 or foreground
         local ret = wibox.widget {
             {
                 widget,
@@ -556,7 +588,7 @@ awful.screen.connect_for_each_screen(function(s)
                 widget  = wibox.container.margin
             },
             shape              = props.shape,
-            shape_border_color = props.border_color or '#2d2d2d',
+            shape_border_color = props.border_color or color0,
             shape_border_width = props.border_width or 0,
             fg                 = props.fg_color or default_fg,
             bg                 = props.bg_color or default_bg,
@@ -621,7 +653,7 @@ awful.screen.connect_for_each_screen(function(s)
                 bottom = 6,
                 {
                     id = "suspend",
-                    markup = "<span foreground='#838d69'>鈴</span>",
+                    markup = "<span foreground='"..color2.."'>鈴</span>",
                     align = "center",
                     valign = "center",
                     widget = wibox.widget.textbox,
@@ -632,7 +664,7 @@ awful.screen.connect_for_each_screen(function(s)
                 widget = wibox.container.margin,
                 {
                     id = "reboot",
-                    markup = "<span foreground='#b38d6a'>凌</span>",
+                    markup = "<span foreground='"..color3.."'>凌</span>",
                     align = "center",
                     valign = "center",
                     widget = wibox.widget.textbox,
@@ -643,7 +675,7 @@ awful.screen.connect_for_each_screen(function(s)
                 widget = wibox.container.margin, 
                 {
                     id = "logout",
-                    markup = "<span foreground='#766577'>﫼</span>",
+                    markup = "<span foreground='"..color5.."'>﫼</span>",
                     align = "center",
                     valign = "center",
                     widget = wibox.widget.textbox,
@@ -654,7 +686,7 @@ awful.screen.connect_for_each_screen(function(s)
                 widget = wibox.container.margin,
                 {
                     id = "lock",
-                    markup = "<span foreground='#606d84'></span>",
+                    markup = "<span foreground='"..color4.."'></span>",
                     align = "center",
                     valign = "center",
                     widget = wibox.widget.textbox,
@@ -666,7 +698,7 @@ awful.screen.connect_for_each_screen(function(s)
             widget = wibox.container.margin,
             {
                 id = "poweroff",
-                markup = "<span foreground='#9d5b61'>襤</span>",
+                markup = "<span foreground='"..color1.."'>襤</span>",
                 align = "center",
                 valign = "center",
                 widget = wibox.widget.textbox,
@@ -701,7 +733,7 @@ awful.screen.connect_for_each_screen(function(s)
     }
 
     suspend_yes = wibox.widget {
-        markup = "<span foreground='#838d69'>YES</span>",
+        markup = "<span foreground='"..color2.."'>YES</span>",
         align = "center",
         halign = "center",
         widget = wibox.widget.textbox,
@@ -729,7 +761,7 @@ awful.screen.connect_for_each_screen(function(s)
                         right = 12,
                         widget = wibox.container.margin,
                         {
-                            bg     = '#2d2d2d',
+                            bg     = color0,
                             shape = bubble,
                             widget = wibox.container.background,
                             {
@@ -748,7 +780,7 @@ awful.screen.connect_for_each_screen(function(s)
                         right = 22,
                         widget = wibox.container.margin,
                         {
-                            bg     = '#2d2d2d',
+                            bg     = color0,
                             shape = bubble,
                             widget = wibox.container.background,
                             {
@@ -801,7 +833,7 @@ awful.screen.connect_for_each_screen(function(s)
     }
 
     reboot_yes = wibox.widget {
-        markup = "<span foreground='#b38d6a'>YES</span>",
+        markup = "<span foreground='"..color3.."'>YES</span>",
         align = "center",
         halign = "center",
         widget = wibox.widget.textbox,
@@ -829,7 +861,7 @@ awful.screen.connect_for_each_screen(function(s)
                         right = 12,
                         widget = wibox.container.margin,
                         {
-                            bg     = '#2d2d2d',
+                            bg     = color0,
                             shape = bubble,
                             widget = wibox.container.background,
                             {
@@ -848,7 +880,7 @@ awful.screen.connect_for_each_screen(function(s)
                         right = 22,
                         widget = wibox.container.margin,
                         {
-                            bg     = '#2d2d2d',
+                            bg     = color0,
                             shape = bubble,
                             widget = wibox.container.background,
                             {
@@ -901,7 +933,7 @@ awful.screen.connect_for_each_screen(function(s)
     }
 
     logout_yes = wibox.widget {
-        markup = "<span foreground='#766577'>YES</span>",
+        markup = "<span foreground='"..color5.."'>YES</span>",
         align = "center",
         halign = "center",
         widget = wibox.widget.textbox,
@@ -929,7 +961,7 @@ awful.screen.connect_for_each_screen(function(s)
                         right = 12,
                         widget = wibox.container.margin,
                         {
-                            bg     = '#2d2d2d',
+                            bg     = color0,
                             shape = bubble,
                             widget = wibox.container.background,
                             {
@@ -948,7 +980,7 @@ awful.screen.connect_for_each_screen(function(s)
                         right = 22,
                         widget = wibox.container.margin,
                         {
-                            bg     = '#2d2d2d',
+                            bg     = color0,
                             shape = bubble,
                             widget = wibox.container.background,
                             {
@@ -1001,7 +1033,7 @@ awful.screen.connect_for_each_screen(function(s)
     }                       
                             
     poweroff_yes = wibox.widget {
-        markup = "<span foreground='#9d5b61'>YES</span>",
+        markup = "<span foreground='"..color1.."'>YES</span>",
         align = "center",
         halign = "center",
         widget = wibox.widget.textbox,
@@ -1029,7 +1061,7 @@ awful.screen.connect_for_each_screen(function(s)
                         right = 12,
                         widget = wibox.container.margin,
                         {
-                            bg     = '#2d2d2d',
+                            bg     = color0,
                             shape = bubble,
                             widget = wibox.container.background,
                             {
@@ -1048,7 +1080,7 @@ awful.screen.connect_for_each_screen(function(s)
                         right = 22,
                         widget = wibox.container.margin,
                         {   
-                            bg     = '#2d2d2d',
+                            bg     = color0,
                             shape = bubble,
                             widget = wibox.container.background,
                             {
@@ -1093,7 +1125,11 @@ awful.screen.connect_for_each_screen(function(s)
     end)
 
     -- Create the wibox
-    s.mywibox = awful.wibar({ position = "left", screen = s, width = 48 })
+    s.mywibox = awful.wibar({
+        position = "left",
+        screen = s,
+        width = 48,
+    })
 
     -- Add widgets to the wibox
     s.mywibox:setup {
@@ -1110,7 +1146,7 @@ awful.screen.connect_for_each_screen(function(s)
                 margins = 4,
                 widget = wibox.container.margin,
                 {
-                    bg     = '#2d2d2d',
+                    bg     = color0,
                     shape = bubble,
                     widget = wibox.container.background,
                     {
@@ -1132,7 +1168,7 @@ awful.screen.connect_for_each_screen(function(s)
                 right  = 4,
                 widget = wibox.container.margin,
                 {
-                    bg     = '#2d2d2d',
+                    bg     = color0,
                     shape = bubble,
                     widget = wibox.container.background,
                     {
@@ -1152,7 +1188,7 @@ awful.screen.connect_for_each_screen(function(s)
                 margins = 4,
                 widget = wibox.container.margin,
                 {
-                    bg     = '#2d2d2d',
+                    bg     = color0,
                     shape = bubble,
                     widget = wibox.container.background,
                     {
