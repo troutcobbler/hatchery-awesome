@@ -109,18 +109,22 @@ wonky_font = "hack 12"
 wonky_bg   = "#00000000"
 wonky_fg   = "#808080"
 
--- This is used later as the default terminal and editor to run.
-terminal = "xfce4-terminal"
-launcher = "rofi_run.sh"
-browser = "firefox"
-editor = os.getenv("EDITOR") or "editor"
+-- Default applications 
+terminal   = "xfce4-terminal"
+launcher   = "rofi_run.sh"
+browser    = "firefox"
+editor     = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
 
--- Default modkey.
--- Usually, Mod4 is the key with a logo between Control and Alt.
--- If you do not like this or do not have such a key,
--- I suggest you to remap Mod4 to another key using xmodmap or other tools.
--- However, you can use another modifier like Mod1, but it may interact with others.
+-- Power menu commands
+suspend_cmd  = "systemctl suspend && slock" 
+reboot_cmd   = "systemctl reboot"
+logout_cmd   = awesome.quit
+lock_cmd     = "slock"
+poweroff_cmd = "systemctl poweroff"
+
+-- Default modkey
+-- Mod4 is the Super key, Mod1 is Alt 
 modkey = "Mod1"
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
@@ -733,7 +737,7 @@ awful.screen.connect_for_each_screen(function(s)
     -- We don't need a popup for lock
     s.mypower:get_children_by_id("lock")[1]:connect_signal('button::release', function()
         s.mypower:get_children_by_id("slider_box")[1].forced_height = 0
-        awful.spawn.easy_async("slock", function() end)
+        awful.spawn.easy_async(lock_cmd, function() end)
     end)
 
     -- Power widget popups
@@ -826,7 +830,7 @@ awful.screen.connect_for_each_screen(function(s)
 
     suspend_yes:connect_signal("button::release", function(self)
         s.mypower.suspend.visible = false
-        awful.spawn.with_shell("systemctl suspend && slock")
+        awful.spawn.with_shell(suspend_cmd)
     end)
 
     s.mypower:get_children_by_id("suspend")[1]:connect_signal('button::release', function()
@@ -926,7 +930,7 @@ awful.screen.connect_for_each_screen(function(s)
 
     reboot_yes:connect_signal("button::release", function(self)
         s.mypower.reboot.visible = false
-        awful.spawn.easy_async("systemctl reboot", function() end)
+        awful.spawn.easy_async(reboot_cmd, function() end)
     end)
 
     s.mypower:get_children_by_id("reboot")[1]:connect_signal('button::release', function()
@@ -1026,7 +1030,7 @@ awful.screen.connect_for_each_screen(function(s)
 
     logout_yes:connect_signal("button::release", function(self)
         s.mypower.logout.visible = false
-        awesome.quit()
+        logout_cmd()
     end)
 
     s.mypower:get_children_by_id("logout")[1]:connect_signal('button::release', function()
@@ -1126,7 +1130,7 @@ awful.screen.connect_for_each_screen(function(s)
                             
     poweroff_yes:connect_signal("button::release", function(self)
         s.mypower.poweroff.visible = false
-        awful.spawn.easy_async("systemctl poweroff", function() end)
+        awful.spawn.easy_async(poweroff_cmd, function() end)
     end)
 
     s.mypower:get_children_by_id("poweroff")[1]:connect_signal('button::release', function()
