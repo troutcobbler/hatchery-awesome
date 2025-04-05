@@ -186,6 +186,19 @@ awful.screen.connect_for_each_screen(function(s)
     -- Each screen has its own tag table.
     awful.tag({ "", "", "", "", "ﱘ", "", }, s, awful.layout.layouts[1])
 
+    -- Set some gaps and padding on the last tag for nextcloud
+    awful.tag.attached_connect_signal(nil, "property::selected", function(t)
+        local s = t.screen or awful.screen.focused()
+        local padding = t.padding or 0
+        s.padding = padding
+    end)
+
+    awful.tag.find_by_name(awful.screen.focused(), "").padding = {
+        left = 200, right = 200, top = 100, bottom = 100
+    }
+    awful.tag.find_by_name(awful.screen.focused(), "").gap_single_client = true
+    awful.tag.find_by_name(awful.screen.focused(), "").gap = 50
+
     -- Shapes
     -- Bubble 
     local bubble = function(cr, width, height)
