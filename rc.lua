@@ -104,6 +104,11 @@ nconf.defaults.timeout = 3
 nconf.presets.critical.bg = background 
 nconf.presets.critical.fg = foreground
 
+-- Wonky
+wonky_font = "hack 12"
+wonky_bg   = "#00000000"
+wonky_fg   = "#808080"
+
 -- This is used later as the default terminal and editor to run.
 terminal = "xfce4-terminal"
 launcher = "rofi_run.sh"
@@ -1132,6 +1137,71 @@ awful.screen.connect_for_each_screen(function(s)
         end
     end)
 
+    -- Wonky popup
+    s.wonky = awful.popup {
+        widget = {
+            top    = 60,
+            bottom = 0,
+            left   = 0, 
+            right  = 20,
+            widget = wibox.container.margin,
+            {
+                widget = wibox.layout.fixed.vertical,
+                {
+                    text   = 'BASIC NAVIGATION',
+                    font   = wonky_font,
+                    widget = wibox.widget.textbox
+                },
+                {
+                    text   = ' ',
+                    font   = wonky_font,
+                    widget = wibox.widget.textbox
+                },
+                {
+                    text   = 'ALT+P            run command',
+                    font   = wonky_font,
+                    widget = wibox.widget.textbox
+                },
+                {
+                    text   = 'ALT+SHIFT+ENTER  open terminal',
+                    font   = wonky_font,
+                    widget = wibox.widget.textbox
+                },
+                {
+                    text   = 'ALT+Q            close window',
+                    font   = wonky_font,
+                    widget = wibox.widget.textbox
+                },
+                {
+                    text   = 'ALT+1-6          switch between workspaces',
+                    font   = wonky_font,
+                    widget = wibox.widget.textbox
+                },
+                {
+                    text   = 'ALT+SHIFT+1-6    move window to workspace',
+                    font   = wonky_font,
+                    widget = wibox.widget.textbox
+                },
+                {
+                    text   = 'ALT+F12          show/hide this dialog',
+                    font   = wonky_font,
+                    widget = wibox.widget.textbox
+                },
+                {
+                    text   = 'ALT+SHIFT+Q      logout',
+                    font   = wonky_font,
+                    widget = wibox.widget.textbox
+                },
+            },
+        },
+        placement     = awful.placement.top_right,
+        ontop         = false,
+        visible       = true,
+        minimum_width = 300,
+        bg            = wonky_bg,
+        fg            = wonky_fg,
+    }
+
     -- Create the wibox
     s.mywibox = awful.wibar({
         position = "left",
@@ -1308,23 +1378,20 @@ globalkeys = gears.table.join(
               end,
               {description = "restore minimized", group = "client"}),
 
-    -- Prompt
-    --awful.key({ modkey },            "r",     function () awful.screen.focused().mypromptbox:run() end,
-    --          {description = "run prompt", group = "launcher"}),
-
-    --awful.key({ modkey }, "x",
-    --          function ()
-    --              awful.prompt.run {
-    --                prompt       = "Run Lua code: ",
-    --                textbox      = awful.screen.focused().mypromptbox.widget,
-    --                exe_callback = awful.util.eval,
-    --                history_path = awful.util.get_cache_dir() .. "/history_eval"
-    --              }
-    --          end,
-    --          {description = "lua execute prompt", group = "awesome"}),
     -- Launcher 
     awful.key({ modkey }, "p", function() awful.spawn(launcher) end,
-              {description = "show the launcher", group = "launcher"})
+              {description = "show the launcher", group = "launcher"}),
+
+    -- Wonky
+    awful.key({ modkey }, "F12",
+        function()
+            if awful.screen.focused().wonky.visible == false then
+                awful.screen.focused().wonky.visible = true
+            else
+                awful.screen.focused().wonky.visible = false
+            end
+        end,
+        {description = "toggle wonky", group = "screen"})
 )
 
 clientkeys = gears.table.join(
