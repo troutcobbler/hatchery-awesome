@@ -111,10 +111,15 @@ wonky_fg   = "#808080"
 
 -- Default applications 
 terminal   = "xfce4-terminal"
-launcher   = "rofi_run.sh"
+launcher   = "rofi -show run"
 browser    = "firefox"
 editor     = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
+volume_app = "pavucontrol"
+
+-- Screenshot settings, use Printscreen or Alt + Printscreen for a selected area
+scrot      = "scrot -F "..os.getenv("HOME").."/Pictures/'%Y-%m-%d-%s_$wx$h.png'"
+scrot_sel  = "scrot -s -F "..os.getenv("HOME").."/Pictures/'%Y-%m-%d-%s_$wx$h.png'"
 
 -- Power menu commands
 suspend_cmd  = "systemctl suspend && slock" 
@@ -122,6 +127,9 @@ reboot_cmd   = "systemctl reboot"
 logout_cmd   = awesome.quit
 lock_cmd     = "slock"
 poweroff_cmd = "systemctl poweroff"
+
+-- Laptop backlight
+backlight = "amdgpu_bl0"
 
 -- Default modkey
 -- Mod4 is the Super key, Mod1 is Alt 
@@ -376,15 +384,12 @@ awful.screen.connect_for_each_screen(function(s)
         },
     }
 
-    -- Brightness widget variables 
-    s.mybrightness.backlight = "amdgpu_bl0"
-
     -- Brightness widget functions
     -- Show slider when entering widget
     s.mybrightness:connect_signal('mouse::enter', function(self)
 
         -- Reflect brightness changes prior to opening widget
-        awful.spawn.easy_async("brightnessctl g "..s.mybrightness.backlight, function(stdout)
+        awful.spawn.easy_async("brightnessctl g "..backlight, function(stdout)
             local brightness = tonumber(stdout)/255
             s.mybrightness:get_children_by_id("slider")[1]:set_value(brightness)
         end)
@@ -411,7 +416,7 @@ awful.screen.connect_for_each_screen(function(s)
             brightness = 100
         end
 
-        local command = "brightnessctl s "..tostring(brightness).."% "..s.mybrightness.backlight
+        local command = "brightnessctl s "..tostring(brightness).."% "..backlight
 
         awful.spawn.easy_async(command, function() end)
 
@@ -426,7 +431,7 @@ awful.screen.connect_for_each_screen(function(s)
     -- Brightness widget tooltip function
     s.mybrightness:get_children_by_id("icon")[1]:connect_signal('mouse::enter', function()
             awful.spawn.easy_async(
-                {"bash", "-c", "brightnessctl g "..s.mybrightness.backlight},
+                {"bash", "-c", "brightnessctl g "..backlight},
                 function(stdout)
                     tooltip = tostring(math.floor(tonumber(stdout)/255*100))
                     s.mybrightness.tooltip.text = "Brightness: "..tooltip.."%"
@@ -515,9 +520,9 @@ awful.screen.connect_for_each_screen(function(s)
            
     end)
 
-    -- Launch pavucontrol when clicking on volume icon
+    -- Launch volume_app when clicking on volume icon
     s.myvolume:get_children_by_id("icon")[1]:connect_signal('button::release', function()
-        awful.spawn.easy_async("pavucontrol", function() end)
+        awful.spawn.easy_async(volume_app, function() end)
     end)
 
     -- Volume widget tooltip
@@ -1383,8 +1388,16 @@ globalkeys = gears.table.join(
               {description = "restore minimized", group = "client"}),
 
     -- Launcher 
-    awful.key({ modkey }, "p", function() awful.spawn(launcher) end,
+    awful.key({ modkey }, "p", function() awful.spawn.easy_async(launcher, function() end) end,
               {description = "show the launcher", group = "launcher"}),
+
+    -- Screenshot
+    awful.key({ }, "Print", function() awful.spawn.easy_async(scrot, function() end) end,
+              {description = "take a screenshot", group = "screen"}),
+
+    -- Screenshot selected area 
+    awful.key({ modkey }, "Print", function() awful.spawn.easy_async(scrot_sel, function() end) end,
+              {description = "take a screenshot of a selected area", group = "screen"}),
 
     -- Wonky
     awful.key({ modkey }, "F12",
