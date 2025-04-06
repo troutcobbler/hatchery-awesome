@@ -44,6 +44,14 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
+-- Tag icons
+tag1 = ""
+tag2 = ""
+tag3 = ""
+tag4 = ""
+tag5 = "ﱘ"
+tag6 = ""
+
 -- Colors
 foreground = "#a7a7a7"
 background = "#202020"
@@ -184,20 +192,20 @@ awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    awful.tag({ "", "", "", "", "ﱘ", "", }, s, awful.layout.layouts[1])
+    awful.tag({ tag1, tag2, tag3, tag4, tag5, tag6, }, s, awful.layout.layouts[1])
 
-    -- Set some gaps and padding on the last tag for nextcloud
+    -- Set some gaps and padding on the last tag
     awful.tag.attached_connect_signal(nil, "property::selected", function(t)
         local s = t.screen or awful.screen.focused()
         local padding = t.padding or 0
         s.padding = padding
     end)
 
-    awful.tag.find_by_name(awful.screen.focused(), "").padding = {
+    awful.tag.find_by_name(awful.screen.focused(), tag6).padding = {
         left = 200, right = 200, top = 100, bottom = 100
     }
-    awful.tag.find_by_name(awful.screen.focused(), "").gap_single_client = true
-    awful.tag.find_by_name(awful.screen.focused(), "").gap = 50
+    awful.tag.find_by_name(awful.screen.focused(), tag6).gap_single_client = true
+    awful.tag.find_by_name(awful.screen.focused(), tag6).gap = 50
 
     -- Shapes
     -- Bubble 
@@ -1589,13 +1597,13 @@ awful.rules.rules = {
       }, properties = { titlebars_enabled = false }
     },
 
-    -- Set nextcloud to always map on the tag named ""
+    -- Open nextcloud on tag6
     { rule = { instance = "nextcloud" },
-      properties = { tag = "" } },
+      properties = { tag = tag6 } },
 
-    -- Set atril to always map on the tag named ""
+    -- Open atril on tag1
     { rule = { instance = "atril" },
-      properties = { tag = "", switchtotag = true } },
+      properties = { tag = tag1, switchtotag = true } },
 }
 -- }}}
 
