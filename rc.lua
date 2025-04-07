@@ -209,7 +209,7 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- Shapes
     -- Bubble 
-    local bubble = function(cr, width, height)
+    bubble = function(cr, width, height)
         gears.shape.rounded_rect(cr, width, height, 5)
     end
 
