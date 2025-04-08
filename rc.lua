@@ -201,11 +201,11 @@ awful.screen.connect_for_each_screen(function(s)
         s.padding = padding
     end)
 
-    awful.tag.find_by_name(awful.screen.focused(), tag6).padding = {
+    awful.tag.find_by_name(awful.screen.focused().tags[TAG_INDEX], tag6).padding = {
         left = 200, right = 200, top = 100, bottom = 100
     }
-    awful.tag.find_by_name(awful.screen.focused(), tag6).gap_single_client = true
-    awful.tag.find_by_name(awful.screen.focused(), tag6).gap = 50
+    awful.tag.find_by_name(awful.screen.focused().tags[TAG_INDEX], tag6).gap_single_client = true
+    awful.tag.find_by_name(awful.screen.focused().tags[TAG_INDEX], tag6).gap = 50
 
     -- Shapes
     -- Bubble 
