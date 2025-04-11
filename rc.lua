@@ -137,7 +137,10 @@ lock_cmd     = "slock"
 poweroff_cmd = "systemctl poweroff"
 
 -- Laptop backlight
-backlight = "amdgpu_bl0"
+-- Run "brightnessctl info" from the terminal to get your specific values
+-- and then input them here.
+backlight      = "amdgpu_bl0"
+max_brightness = 255
 
 -- Default modkey
 -- Mod4 is the Super key, Mod1 is Alt 
@@ -411,7 +414,7 @@ awful.screen.connect_for_each_screen(function(s)
 
         -- Reflect brightness changes prior to opening widget
         awful.spawn.easy_async("brightnessctl g "..backlight, function(stdout)
-            local brightness = tonumber(stdout)/255
+            local brightness = tonumber(stdout)/max_brightness
             s.mybrightness:get_children_by_id("slider")[1]:set_value(brightness)
         end)
 
@@ -454,7 +457,7 @@ awful.screen.connect_for_each_screen(function(s)
             awful.spawn.easy_async(
                 {"bash", "-c", "brightnessctl g "..backlight},
                 function(stdout)
-                    tooltip = tostring(math.floor(tonumber(stdout)/255*100))
+                    tooltip = tostring(math.floor(tonumber(stdout)/max_brightness*100))
                     s.mybrightness.tooltip.text = "Brightness: "..tooltip.."%"
                 end
             )
