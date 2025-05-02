@@ -657,7 +657,9 @@ awful.screen.connect_for_each_screen(function(s)
         widget = calendar,
         visible      = false,
         ontop        = true,
-        placement    = awful.placement.bottom_left,
+        placement = function(w)
+            awful.placement.bottom_left(w, { offset = { x = 68, y = -20 } })
+        end
     }
 
     -- Calendar state variable
@@ -665,18 +667,18 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- Clock functions
     s.myclock:get_children_by_id("clock")[1]:connect_signal('button::release', function()
-        if calendar_toggled == false then
-            calendar_toggled = true
-            s.myclock.calendar.visible = true
+        calendar_toggled = not calendar_toggled
+        if calendar_toggled then
+            s.myclock.calendar.visible = true 
         else
-            calendar_toggled = false
             s.myclock.calendar.visible = false 
         end
     end)
 
     s.myclock:get_children_by_id("clock")[1]:connect_signal('mouse::enter', function()
-        awful.placement.bottom_left(s.myclock.calendar, { margins = { bottom = 20, left = 68 } })
         if calendar_toggled == false then
+            calendar.date = nil 
+            calendar.date = os.date('*t')
             s.myclock.calendar.visible = true
         end
     end)
@@ -863,11 +865,7 @@ awful.screen.connect_for_each_screen(function(s)
     end)
 
     s.mypower:get_children_by_id("suspend")[1]:connect_signal('button::release', function()
-        if s.mypower.suspend.visible == false then
-            s.mypower.suspend.visible = true
-        else
-            s.mypower.suspend.visible = false
-        end
+        s.mypower.suspend.visible = not s.mypower.suspend.visible
     end)
 
     -- Reboot popup widgets
@@ -963,11 +961,7 @@ awful.screen.connect_for_each_screen(function(s)
     end)
 
     s.mypower:get_children_by_id("reboot")[1]:connect_signal('button::release', function()
-        if s.mypower.reboot.visible == false then
-            s.mypower.reboot.visible = true
-        else
-            s.mypower.reboot.visible = false
-        end
+        s.mypower.reboot.visible = not s.mypower.reboot.visible
     end)
 
     -- Logout popup widgets
@@ -1063,11 +1057,7 @@ awful.screen.connect_for_each_screen(function(s)
     end)
 
     s.mypower:get_children_by_id("logout")[1]:connect_signal('button::release', function()
-        if s.mypower.logout.visible == false then
-            s.mypower.logout.visible = true
-        else
-            s.mypower.logout.visible = false
-        end
+        s.mypower.logout.visible = not s.mypower.logout.visible
     end)
 
     -- Poweroff popup widgets
@@ -1163,11 +1153,7 @@ awful.screen.connect_for_each_screen(function(s)
     end)
 
     s.mypower:get_children_by_id("poweroff")[1]:connect_signal('button::release', function()
-        if s.mypower.poweroff.visible == false then
-            s.mypower.poweroff.visible = true
-        else
-            s.mypower.poweroff.visible = false
-        end
+        s.mypower.poweroff.visible = not s.mypower.poweroff.visible
     end)
 
     -- Wonky popup
