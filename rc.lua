@@ -119,7 +119,7 @@ wonky_fg   = "#808080"
 
 -- Default applications 
 terminal   = "xfce4-terminal"
-launcher   = "rofi -show run"
+launcher   = "rofi -show drun"
 browser    = "firefox"
 editor     = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
